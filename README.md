@@ -7,6 +7,8 @@ Already exist:
   some of the standart types
  
 # ToDo:
+Append functionality for 'continue' in loops,
+
 Write JS parser,
 
 Write compiler,
