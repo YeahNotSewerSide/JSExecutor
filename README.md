@@ -9,6 +9,10 @@ Write JS parser,
 
 more standart types,
 
+Write standart Exceptions,
+
+Append throw functionality,
+
 rewrite undefined,none,null,
 
 Write documentation
