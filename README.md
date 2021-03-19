@@ -7,7 +7,7 @@ Already exist:
 # ToDo:
 Write JS parser,
 
-more standart types,
+more standart types and predefined data,
 
 Write standart Exceptions,
 
