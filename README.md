@@ -2,10 +2,14 @@
 Already exist:
   VM core,
   
+  defined 'bytecode' for VM
+  
   some of the standart types
  
 # ToDo:
 Write JS parser,
+
+Write compiler,
 
 more standart types and predefined data,
 
@@ -15,4 +19,6 @@ Append throw functionality,
 
 rewrite undefined,none,null,
 
-Write documentation
+Write documentation,
+
+compile some of JS libraries
