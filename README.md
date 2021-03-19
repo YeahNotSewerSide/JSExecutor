@@ -5,8 +5,10 @@ Already exist:
   some of the standart types
  
 # ToDo:
-JS parser,
+Write JS parser,
 
 more standart types,
 
-rewrite undefined,none,null
+rewrite undefined,none,null,
+
+Write documentation
