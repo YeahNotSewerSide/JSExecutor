@@ -1,6 +1,7 @@
 from . import Types
 import Exceptions
 from .CodeBlock import CodeBlock
+#from StandartTypes import Array
 
 '''
 operation - ()
@@ -41,14 +42,17 @@ class Function(CodeBlock):
         self.nested = nested  
         self.static = static
 
-    def execute(self,arguments:tuple,global_variables:dict):
-        local_variables = {'arguments':arguments,}
+    def execute(self,arguments,global_variables:dict):
         
-        if len(self.input_arguments) >= len(arguments):
-            for argument in enumerate(arguments):            
+        local_variables = {'arguments':arguments,}
+        arguments_native = arguments#arguments.this['value']
+
+        if len(self.input_arguments) >=\
+           len(arguments_native):
+            for argument in enumerate(arguments_native):            
                 local_variables[self.input_arguments[argument[0]]] = argument[1]
         
-            for i in range(len(arguments),\
+            for i in range(len(arguments_native),\
                             len(self.input_arguments)):
                 try:
                     local_variables[self.input_arguments[i]] = self.default_values[self.input_arguments[i]]
@@ -56,7 +60,7 @@ class Function(CodeBlock):
                     local_variables[self.input_arguments[i]] = Types.undefined
         else:
             for input_argument in enumerate(self.input_arguments):
-                local_variables[input_argument[1]] = arguments[input_argument[0]]
+                local_variables[input_argument[1]] = arguments_native[input_argument[0]]
 
         return_value = Types.undefined
         for operation in self.operations:

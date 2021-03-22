@@ -76,12 +76,12 @@
     <Compile Include="CodeStructures\Undefined.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="VMExceptions.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="__init__.py">
       <SubType>Code</SubType>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="script.js" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CodeStructures\" />

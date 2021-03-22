@@ -32,11 +32,16 @@ def convert_to_number(input):
         return Types.NaN
 
 
-NUMBER_CONSTRUCTOR_OPERATIONS = (('var_change',
-                                  ('this.','value'),
-                                  (((Types.VarName('input'),),),
-                                   convert_to_number,Types.EXECUTE_)),
-                                 ('return',(('value',),Types.ListName('this.')))
+NUMBER_CONSTRUCTOR_OPERATIONS = (('var_change',('this.','value'),
+                                  (Types.VarName('input'),
+                                   1,
+                                   convert_to_number,
+                                   Types.EXECUTE_)),
+
+                                 ('return',('value',
+                                            1,
+                                            Types.VarName('this.'),
+                                            Types.LISTACCESS_))
                                  )
 
 NUMBER_CONSTRUCTOR = Types.Function(('input',),
@@ -89,8 +94,12 @@ def toExponential_native(number:float,precision=None):
 
 toExponential_operations = (('return',
                             (
-                                ((('value',),Types.ListName('this')),
-                                 (Types.VarName('precision'),)),
+                                Types.VarName('precision'),
+                                'value',
+                                1,
+                                Types.VarName('this'),
+                                Types.LISTACCESS_,
+                                 2,
                              toExponential_native,
                              Types.EXECUTE_)
                             ),)
@@ -115,8 +124,12 @@ def toFixed_native(number:float,precision=0):
 
 toFixed_operations = (('return',
                             (
-                                ((('value',),Types.ListName('this')),
-                                 (Types.VarName('precision'),)),
+                                Types.VarName('precision'),
+                                'value',
+                                1,
+                                Types.VarName('this'),
+                                Types.LISTACCESS_,
+                                 2,
                              toFixed_native,
                              Types.EXECUTE_)
                             ),)
@@ -136,8 +149,11 @@ def toLocaleString_native(number):
 
 toLocaleString_operations = (('return',
                                 (
-                                    ((('value',),Types.ListName('this')),
-                                     ),
+                                    'value',
+                                    1,
+                                    Types.VarName('this'),
+                                    Types.LISTACCESS_,
+                                    1,
                                  toLocaleString_native,
                                  Types.EXECUTE_)
                                 ),)
@@ -169,8 +185,12 @@ def toPrecision_native(number,precision=None):
 
 toPrecision_operations = (('return',
                             (
-                                ((('value',),Types.ListName('this')),
-                                 (Types.VarName('precision'),)),
+                                Types.VarName('precision'),
+                                'value',
+                                1,
+                                Types.VarName('this'),
+                                Types.LISTACCESS_,
+                                 2,
                              toPrecision_native,
                              Types.EXECUTE_)
                             ),)
@@ -211,8 +231,12 @@ def toString_native(x, base):
 
 toString_operations = (('return',
                             (
-                                ((('value',),Types.ListName('this')),
-                                 (Types.VarName('radix'),)),
+                                Types.VarName('radix'),
+                                'value',
+                                1,
+                                Types.VarName('this'),
+                                Types.LISTACCESS_,
+                                 2,
                              toString_native,
                              Types.EXECUTE_)
                             ),)
@@ -231,7 +255,12 @@ def valueOf_native(number_native):
     return Number.new((number_native,),{})
 
 valueOf_operations = (('return',
-                       (((('value',),Types.ListName('this')),),valueOf_native,Types.EXECUTE_)),)
+                       ('value',
+                        1,
+                        Types.VarName('this'),
+                        Types.LISTACCESS_,
+                        1,
+                        valueOf_native,Types.EXECUTE_)),)
 valueOf_wrapper = Types.Function(('this',),
                                  valueOf_operations,
                                  static=False)

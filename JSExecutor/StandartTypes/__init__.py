@@ -104,7 +104,7 @@ if __name__ == '__main__':
     print('length:',length_array)
 
     test_callback = Types.Function(('element','index','array'),
-                                   (('return',((True,),Types.ClassNew('Boolean'))),))
+                                   (('return',(Boolean.Boolean.new((True,),{}),)),))
     every_array = array.execute_function('every',(test_callback,),GLOBAL_PARAMETERS)
     print('every:',every_array)
 

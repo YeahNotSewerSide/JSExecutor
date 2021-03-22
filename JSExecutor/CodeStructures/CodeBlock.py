@@ -1,5 +1,7 @@
 from . import Types
 import Exceptions
+import VMExceptions
+
 import StandartTypes
 
 def index_check(input):
@@ -7,14 +9,23 @@ def index_check(input):
     #    if input.is_integer():
     #        return int(input)
     #return input
-    if not isinstance(input,tuple)\
-        and not isinstance(input,str)\
-        and str(input.typeof()) == 'number'\
-        and isinstance(input.this['value'],float)\
-        and input.this['value'].is_integer():
+    if not isinstance(input,str) \
+        and str(input.typeof()) == 'number':
+        if input.this['value'].is_integer():
             return int(input)
+        else:
+            return float(input)
     else:
-        return input
+        return str(input)
+    #if not isinstance(input,str)\
+    #    and str(input.typeof()) == 'number'\
+    #    and isinstance(input.this['value'],float)\
+    #    and input.this['value'].is_integer():
+    #        return int(input)
+    #elif str(input.typeof()) == 'number':
+    #    return float(input)
+    #else:
+    #    return str(input)
     
 
 
@@ -25,27 +36,7 @@ class CodeBlock:
         stack = []
         for item in operation:
             result = None  
-            if isinstance(item,Types.ClassNew):
-                try:
-                    result = local_variables[str(item)]
-                except:
-                    try:
-                        result = global_variables[str(item)]
-                    except:
-                        raise Exceptions.ReferenceError(str(item))
-                arguments = stack.pop()
-                arguments_calculated = []
-                for argument in arguments:
-                    if isinstance(argument,tuple):
-                        arguments_calculated.append(self.calc_operation(argument,\
-                                                                     global_variables,\
-                                                                     local_variables))
-                    else:
-                        arguments_calculated.append(argument)
-                result = result.new(arguments_calculated,global_variables)
-               
-
-            elif isinstance(item,Types.VarName):
+            if isinstance(item,Types.VarName):
                 try:
                     result = local_variables[str(item)]
                 except:
@@ -208,6 +199,28 @@ class CodeBlock:
                     except:
                         result = StandartTypes.Boolean.Boolean.new((False,),
                                                                      global_variables)
+                elif item == Types.MOREEQUAL_:
+                    second = stack.pop()
+                    first = stack.pop()
+                    if isinstance(first,tuple):
+                        first = self.calc_operation(first,\
+                                                    global_variables,\
+                                                    local_variables)
+                    if isinstance(second,tuple):
+                        second = self.calc_operation(second,\
+                                                    global_variables,\
+                                                    local_variables)
+                    try:
+                        if str(first.typeof()) == 'number' or\
+                           str(second.typeof()) == 'number':
+                            result = float(first)>=float(second)
+                        else:
+                            result = str(first.execute_function('toString',(),global_variables)) >= \
+                                    str(second.execute_function('toString',(),global_variables))
+                    except:
+                        result = str(first.execute_function('toString',(),global_variables)) >= \
+                                    str(second.execute_function('toString',(),global_variables))
+                    result = StandartTypes.Boolean.Boolean.new((result,),global_variables)
 
                 elif item == Types.LESS_:
                     second = stack.pop()
@@ -226,6 +239,29 @@ class CodeBlock:
                     except:
                         result = StandartTypes.Boolean.Boolean.new((False,),
                                                                      global_variables)
+
+                elif item == Types.LESSEQUAL_:
+                    second = stack.pop()
+                    first = stack.pop()
+                    if isinstance(first,tuple):
+                        first = self.calc_operation(first,\
+                                                    global_variables,\
+                                                    local_variables)
+                    if isinstance(second,tuple):
+                        second = self.calc_operation(second,\
+                                                    global_variables,\
+                                                    local_variables)
+                    try:
+                        if str(first.typeof()) == 'number' or\
+                           str(second.typeof()) == 'number':
+                            result = float(first)<=float(second)
+                        else:
+                            result = str(first.execute_function('toString',(),global_variables)) <= \
+                                    str(second.execute_function('toString',(),global_variables))
+                    except:
+                        result = str(first.execute_function('toString',(),global_variables)) <= \
+                                    str(second.execute_function('toString',(),global_variables))
+                    result = StandartTypes.Boolean.Boolean.new((result,),global_variables)
                 
                 elif item == Types.RIGHTSHIFT_:
                     second = stack.pop()
@@ -320,19 +356,15 @@ class CodeBlock:
                     result = first
                 elif item == Types.EXECUTE_:
                     func = stack.pop()
-                    if isinstance(func,tuple):
-                        first = self.calc_operation(func,\
-                                                    global_variables,\
-                                                    local_variables)
-                    arguments = stack.pop()
+                    count_of_arguments = stack.pop()
+
+                    if not isinstance(count_of_arguments,int):
+                        raise VMExceptions.WrongCountOfArguments()
+
                     arguments_calculated = []
-                    for argument in arguments:
-                        if isinstance(argument,tuple):
-                            arguments_calculated.append(self.calc_operation(argument,\
-                                                                         global_variables,\
-                                                                         local_variables))
-                        else:
-                            arguments_calculated.append(argument)
+                    for i in range(count_of_arguments):
+                        arguments_calculated.append(stack.pop())
+
                     if isinstance(func,Types.Function):
                         merged_global_variables = global_variables.copy()
                         merged_global_variables.update(local_variables)
@@ -351,42 +383,29 @@ class CodeBlock:
                             result = result[1]
                     elif isinstance(func,Types.ClassExecute):
                         object = stack.pop()
-                        #try:
-                        #    result = local_variables[str(func[0])]
-                        #except:
-                        #    try:
-                        #        result = global_variables[str(func[0])]
-                        #    except:
-                        #        raise Exceptions.ReferenceError(str(func))
                         result = object.execute_function(str(func),
                                                          arguments_calculated,
                                                          global_variables)
                     elif callable(func):
                         result = func(*arguments_calculated)
-            elif isinstance(item,Types.ListName):
-                index = index_check(stack.pop())
-                if isinstance(index,tuple):
-                    try:
-                        result = local_variables[str(item)]
-                    except:
-                        try:
-                            result = global_variables[str(item)]
-                        except:
-                            raise Exceptions.ReferenceError(str(item))
-                    for argument in index:
-                        calculated_argument = None
+                elif item == Types.NEW_:
+                    class_ = stack.pop()
+                    count_of_arguments = stack.pop()
+                    if not isinstance(count_of_arguments,int):
+                        raise VMExceptions.WrongCountOfArguments()
 
-                        if isinstance(argument,tuple):
-                            calculated_argument = self.calc_operation(argument,\
-                                                  global_variables,\
-                                                  local_variables)
-                        else:
-                            calculated_argument = argument
-                        
-                        result = result[index_check(calculated_argument)]
-                else:
-                    raise Exceptions.BadListIndex(index)
-            #elif isinstance(item,Types.ClassAccess):
+                    arguments_calculated = []
+                    for i in range(count_of_arguments):
+                        arguments_calculated.append(stack.pop())
+                    result = class_.new(arguments_calculated,
+                                        global_variables)
+                elif item == Types.LISTACCESS_:
+                    result = stack.pop()
+                    indexes_count = stack.pop()
+                    for i in range(indexes_count):
+                        index = index_check(stack.pop())
+                        result = result[index]
+
 
             else:
                 result = item

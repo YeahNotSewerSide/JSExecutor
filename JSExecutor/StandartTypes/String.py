@@ -13,14 +13,22 @@ def length_native(string):
                              {})
 STRING_CONSTRUCTOR_OPERATIONS = (('var_change',
                                   ('this.','value'),
-                                  (Types.VarName('input'),(),
+                                  (Types.VarName('input'),
+                                   0,
                                    Types.ClassExecute('toString'),
                                    Types.EXECUTE_)),
                                  ('var_change',
                                   ('this.','length'),
-                                  (((('value',),Types.ListName('this.')),),
+                                  ('value',
+                                   1,
+                                   Types.VarName('this.'),
+                                   Types.LISTACCESS_,
+                                   1,
                                    length_native,Types.EXECUTE_)),
-                                 ('return',(('value',),Types.ListName('this.')))
+                                 ('return',('value',
+                                            1,
+                                            Types.VarName('this.'),
+                                            Types.LISTACCESS_))
                                  )
 STRING_CONSTRUCTOR_WRAPPER = Types.Function(('input',),
                                             STRING_CONSTRUCTOR_OPERATIONS,
@@ -43,9 +51,15 @@ def charCodeAt_native(string,index):
                              {})
 
 charCodeAt_operations = (('return',
-                      ((
-                         (('value',),Types.ListName('this'))
-                        ,(Types.VarName('index'),),),charCodeAt_native,Types.EXECUTE_)),)
+                        (
+                          Types.VarName('index'),
+                         'value',
+                         1,
+                         Types.VarName('this'),
+                         Types.LISTACCESS_,
+                         2,
+                         charCodeAt_native,Types.EXECUTE_)
+                         ),)
 charCodeAt = Types.Function(('this','index'),
                             charCodeAt_operations,
                             static=False)
@@ -117,10 +131,16 @@ def charAt_native(string,index):
     return String.new((string_native(string[index]),),
                       {})
 
-charAt_operations = (('return',
-                      ((
-                         (('value',),Types.ListName('this'))
-                        ,(Types.VarName('index'),),),charAt_native,Types.EXECUTE_)),)
+charAt_operations = (('return',                     
+                         (
+                         Types.VarName('index'),
+                         'value',
+                         1,
+                         Types.VarName('this'),
+                         Types.LISTACCESS_,
+                         2,
+                       charAt_native,Types.EXECUTE_)
+                      ),)
 
 charAt = Types.Function(('this','index'),
                         charAt_operations,
@@ -136,7 +156,9 @@ charAt function END
 '''
 concat function START
 '''
-def concat_native(original_string,*elements):
+def concat_native(args):
+    original_string = args[0]
+    elements = args[1:]
     to_return = original_string['value']
     for argument in elements:
         to_return = to_return + str(argument.execute_function('toString',
@@ -146,7 +168,9 @@ def concat_native(original_string,*elements):
                       {})
 
 concat_operations = (('return',
-                      (Types.VarName('arguments'),concat_native,Types.EXECUTE_)),
+                      (Types.VarName('arguments'),
+                       1,
+                       concat_native,Types.EXECUTE_)),
                      )
 
 concat_wrapper = Types.Function(('this','elements'),
@@ -161,7 +185,10 @@ concat function END
 '''
 toString function START
 '''
-toString_operations = (('return',(('this.',),Types.ListName('this'))),
+toString_operations = (('return',('this.',
+                                  1,
+                                  Types.VarName('this'),
+                                  Types.LISTACCESS_)),
                      )
 toString = Types.Function(('this',),
                                   toString_operations,
@@ -190,10 +217,14 @@ def indexOf_native(original_string:str,searchValue,fromIndex=0):
                              {})
 
 indexOf_operations = (('return',
-                      ((
-                         (('value',),Types.ListName('this'))
-                        ,(Types.VarName('searchValue'),),
-                        (Types.VarName('fromIndex'),)),
+                      (
+                          Types.VarName('fromIndex'),
+                          Types.VarName('searchValue'),
+                         'value',
+                         1,
+                         Types.VarName('this'),
+                         Types.LISTACCESS_,
+                        3,
                        indexOf_native,Types.EXECUTE_)),
                      )
 indexOf_wrapper = Types.Function(('this','searchValue','fromIndex'),
@@ -221,10 +252,14 @@ def lastIndexOf_native(original_string:str,searchValue,fromIndex=0):
                              {})
 
 lastIndexOf_operations = (('return',
-                      ((
-                         (('value',),Types.ListName('this'))
-                        ,(Types.VarName('searchValue'),),
-                        (Types.VarName('fromIndex'),)),
+                      (
+                         Types.VarName('fromIndex'),
+                          Types.VarName('searchValue'),
+                         'value',
+                         1,
+                         Types.VarName('this'),
+                         Types.LISTACCESS_,
+                        3,
                        lastIndexOf_native,Types.EXECUTE_)),
                      )
 lastIndexOf_wrapper = Types.Function(('this','searchValue','fromIndex'),
@@ -264,9 +299,13 @@ def localeCompare_native(string1,string2):
     return Number.Number.new((0,),{})
 
 localeCompare_operations = (('return',
-                      ((
-                         (('value',),Types.ListName('this'))
-                        ,(Types.VarName('param'),),),
+                      (
+                          Types.VarName('param'),
+                         'value',
+                         1,
+                         Types.VarName('this'),
+                         Types.LISTACCESS_,
+                        2,
                        localeCompare_native,Types.EXECUTE_)),
                      )
 

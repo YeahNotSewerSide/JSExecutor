@@ -54,8 +54,9 @@ class Object(CodeBlock):
                 try:
                     return self.MotherClass.methods[attribute_name]
                 except:
-                    raise Exceptions.AttributeError(self.MotherClass.name,
-                                                    attribute_name)
+                    #raise Exceptions.AttributeError(self.MotherClass.name,
+                    #                                attribute_name)
+                    return Types.undefined
     def execute_function(self,\
                         function_name:str,\
                         arguments:tuple,\
@@ -99,6 +100,7 @@ class Object(CodeBlock):
 
     def __bool__(self):
         return bool(self.this['value'])
+    
 
 
     def typeof(self):

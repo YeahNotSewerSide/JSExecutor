@@ -39,41 +39,6 @@ def isNaN(inp='g'):
     except:
         return True
 
-
-#class Bool:
-#    def __init__(self,a:bool):
-#        self.flag = bool(a)
-
-#    def __bool__(self):
-#        return self.flag
-#    def __int__(self):
-#        if self.flag:
-#            return 1
-#        else:
-#            return 0
-#    def __float__(self):
-#        return self.__int__()
-#    def __str__(self):
-#        if self.flag:
-#            return 'true'
-#        else:
-#            return 'false'
-#    def __repr__(self):
-#        return self.__str__()
-
-#    def typeof(self):
-#        return 'boolean'
-
-#preallocated booleans
-#True_ = Bool(True)
-#False_ = Bool(False)
-
-
-
-#class ClassExecute(tuple):
-#    def __new__ (cls, b):
-#        return super(ClassExecute, cls).__new__(cls, tuple(b))
-
 class ClassExecute:
     def __init__(self,name):
         self.name = name
@@ -82,25 +47,6 @@ class ClassExecute:
     def __repr__(self):
         return self.name
 
-class ClassNew:
-    def __init__(self,name):
-        self.name = name
-    def __str__(self):
-        return self.name
-    def __repr__(self):
-        return self.name
-
-#class ClassAccess(tuple):
-#    def __init__(self,*args):
-#        super().__init__(args)
-
-#class ClassNew:
-#    def __init__(self,name):
-#        self.name = name
-#    def __str__(self):
-#        return self.name
-#    def __repr__(self):
-#        return self.name
 
 class VarName:
     def __init__(self,name):
@@ -145,7 +91,11 @@ LEFTSHIFT_ = Operation('<<')
 NOT_ = Operation('!')
 MORE_ = Operation('>')
 LESS_ = Operation('<')
+MOREEQUAL_ = Operation('>')
+LESSEQUAL_ = Operation('<')
 EXECUTE_ = Operation('exe')
+NEW_ = Operation('new')
+LISTACCESS_ = Operation('list')
 
 
 
