@@ -41,7 +41,7 @@ reserved_words = {'a':('await',),
                    }
 
 
-def parse_right_side(right_side:str,global_vars:dict):
+#def parse_right_side(right_side:str,global_vars:dict):
 
     
 

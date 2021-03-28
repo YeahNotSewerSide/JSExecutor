@@ -1,7 +1,7 @@
 
-class Executor:
-    def __init__(self):
-        self.vars = {}
+#class Executor:
+#    def __init__(self):
+#        self.vars = {}
 
-    def execute(self,script:str):
+#    def execute(self,script:str):
 

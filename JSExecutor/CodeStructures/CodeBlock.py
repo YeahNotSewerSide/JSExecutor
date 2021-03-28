@@ -30,6 +30,34 @@ def index_check(input):
 
 
 class CodeBlock:
+    def get_variable(self,name,\
+                     global_variables:dict,\
+                     local_variables:dict):
+
+        try:
+            data = local_variables[name]
+        except:
+            try:
+                data = global_variables[name]
+            except:
+                raise Exceptions.ReferenceError(name)
+        return data
+
+    def change_variable(self,\
+                        name,\
+                        value,\
+                        global_variables:dict,\
+                        local_variables:dict):
+        try:
+            data = local_variables[name]
+            local_variables[name] = value
+        except:
+            try:
+                data = global_variables[name]
+                global_variables[name] = value
+            except:
+                raise Exceptions.ReferenceError(name)
+
     def calc_operation(self,operation:tuple,\
                         global_variables:dict,\
                         local_variables:dict):

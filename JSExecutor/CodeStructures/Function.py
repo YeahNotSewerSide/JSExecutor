@@ -1,6 +1,6 @@
 from . import Types
 import Exceptions
-from .CodeBlock import CodeBlock
+from .CodeBlock import index_check,CodeBlock
 #from StandartTypes import Array
 
 '''
@@ -70,46 +70,33 @@ class Function(CodeBlock):
                                         local_variables)
                 local_variables[operation[1]] = result
             elif operation[0] == 'var_change':
+                index = self.calc_operation(operation[1],\
+                                            global_variables,\
+                                            local_variables)
                 result = self.calc_operation(operation[2],\
                                         global_variables,\
                                         local_variables)
-                if isinstance(operation[1],str):
-                    try:
-                        res = local_variables[operation[1]]
-                        local_variables[operation[1]] = result
-                    except:
+                if isinstance(index,tuple):
+                    data = self.get_variable(index[0],
+                                             global_variables,
+                                             local_variables)
+                    for layer in index[1:-1]:
+                        new_index = index_check(layer)
                         try:
-                            res = global_variables[operation[1]]
-                            global_variables[operation[1]] = result
+                            data = data[new_index]
                         except:
-                            raise Exceptions.ReferenceError(operation[1])
+                            raise Exceptions.ReferenceError(new_index)
+
+                    new_index = index_check(index[-1])
+                    try:
+                        data[new_index] = result 
+                    except:
+                        raise Exceptions.ReferenceError(new_index)
                 else:
-                    if isinstance(operation[1][0],tuple):
-                        index = self.calc_operation(operation[1][0],global_variables,local_variables)
-                    else:
-                        index = operation[1][0]
-                    try:
-                        data = local_variables[index]
-                    except:
-                        try:
-                            data = global_variables[index]
-                        except:
-                            raise Exceptions.ReferenceError(index)
-                    
-                    for layer in operation[1][1:-1]:
-                        if isinstance(layer,tuple):
-                            index = self.calc_operation(layer,global_variables,local_variables)
-                        else:
-                            index = layer
-                        try:
-                            data = data[index]
-                        except:
-                            raise Exceptions.ReferenceError(index)
-                    if isinstance(operation[1][-1],tuple):
-                        index = self.calc_operation(operation[1][-1],global_variables,local_variables)
-                    else:
-                        index = operation[1][-1]
-                    data[operation[1][-1]] = result
+                    self.change_variable(index,
+                                         result,
+                                         global_variables,
+                                         local_variables)
 
             elif operation[0] == 'let':
                 result = self.calc_operation(operation[2],\
@@ -120,21 +107,22 @@ class Function(CodeBlock):
             elif operation[0] == 'function':
                 local_variables[operation[1]] = Function(operation[2],operation[3],nested=True) 
 
-            elif operation[0] == 'if':
+            elif operation[0] == 'if'\
+                or operation[0] == 'loop'\
+                or operation[0] == 'try':
                 global_copy = global_variables.copy()
                 global_copy.update(local_variables)
                 result = operation[1].execute(global_copy)
                 if isinstance(result,tuple):
                     for key in result[1].keys():
                         try:
-                            local_variables.get(key)
-                            local_variables[key] = result[1][key]
+                            self.change_variable(key,
+                                                 result[1][key],
+                                                 global_variables,
+                                                 local_variables)
                         except:
-                            try:
-                                global_variables.get(key)
-                                global_variables[key] = result[1][key]
-                            except:
-                                local_variables[key] = result[1][key]
+                            local_variables[key] = result[1][key]
+            
                     if self.nested:
                         return result[0],global_variables
                     else:
@@ -142,77 +130,12 @@ class Function(CodeBlock):
                 else:
                     for key in result.keys():
                         try:
-                            local_variables.get(key)
+                            self.change_variable(key,
+                                                 result[key],
+                                                 global_variables,
+                                                 local_variables)
+                        except:
                             local_variables[key] = result[key]
-                        except:
-                            try:
-                                global_variables.get(key)
-                                global_variables[key] = result[key]
-                            except:
-                                local_variables[key] = result[key]
-                
-            elif operation[0] == 'loop':
-                global_copy = global_variables.copy()
-                global_copy.update(local_variables)
-                result = operation[1].execute(global_copy)
-
-                if isinstance(result,tuple):
-                    for key in result[1].keys():
-                        try:
-                            local_variables.get(key)
-                            local_variables[key] = result[1][key]
-                        except:
-                            try:
-                                global_variables.get(key)
-                                global_variables[key] = result[1][key]
-                            except:
-                                local_variables[key] = result[1][key]
-                    if self.nested:
-                        return result,global_variables
-                    else:
-                        return result[0]
-                else:
-                    for key in result.keys():
-                        try:
-                            local_variables.get(key)
-                            local_variables[key] = result[key]
-                        except:
-                            try:
-                                global_variables.get(key)
-                                global_variables[key] = result[key]
-                            except:
-                                local_variables[key] = result[key]
-
-            elif operation[0] == 'try':
-                global_copy = global_variables.copy()
-                global_copy.update(local_variables)
-                result = operation[1].execute(global_copy)
-                if isinstance(result,tuple):
-                    for key in result[1].keys():
-                        try:
-                            local_variables.get(key)
-                            local_variables[key] = result[1][key]
-                        except:
-                            try:
-                                global_variables.get(key)
-                                global_variables[key] = result[1][key]
-                            except:
-                                local_variables[key] = result[1][key]
-                    if self.nested:
-                        return result[0],global_variables
-                    else:
-                        return result[0]
-                else:
-                    for key in result.keys():
-                        try:
-                            local_variables.get(key)
-                            local_variables[key] = result[key]
-                        except:
-                            try:
-                                global_variables.get(key)
-                                global_variables[key] = result[key]
-                            except:
-                                local_variables[key] = result[key]
 
             elif operation[0] == 'return':
                 result = self.calc_operation(operation[1],\
@@ -232,20 +155,6 @@ class Function(CodeBlock):
         return 'function'
                 
 
-class BuiltInFunction(CodeBlock):
-    def __init__(self,input_arguments:list,func_ref,nested=False,static=False):
-        self.input_arguments = tuple(input_arguments)
-        self.func_ref = func_ref
-        self.nested = nested  
-        #self.static = static
-
-    def execute(self,arguments:tuple,global_variables:dict):
-        #local_variables = {'arguments':arguments,}
-        return self.func_ref(arguments,global_variables)
-        
-
-    def typeof(self):
-        return 'function'
 
 
 

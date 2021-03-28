@@ -158,7 +158,7 @@ every_loop_operations = (('let','ret',
                            Types.EXECUTE_)
                           ),
                          ('if',every_loop_if),
-                         ('var_change','counter',(Types.VarName('counter'),
+                         ('var_change',('counter',),(Types.VarName('counter'),
                                                   Number.Number.new((1,),{},),
                                                   Types.PLUS_))
                          )
@@ -323,7 +323,7 @@ filter_loop_operations = (('let','ret',
                            Types.EXECUTE_)
                           ),
                          ('if',filter_loop_if),
-                         ('var_change','counter',(Types.VarName('counter'),
+                         ('var_change',('counter',),(Types.VarName('counter'),
                                                   Number.Number.new((1,),{},),
                                                   Types.PLUS_))
                          )
@@ -385,7 +385,7 @@ forEach_loop_operations = (('let','ret',
                            Types.EXECUTE_)
                           ),
                          inloop_operations,
-                         ('var_change','counter',(Types.VarName('counter'),
+                         ('var_change',('counter',),(Types.VarName('counter'),
                                                   Number.Number.new((1,),{},),
                                                   Types.PLUS_))
                          )
@@ -435,7 +435,7 @@ indexOf_loop_condition = ((Types.VarName('this_array'),
                         Types.VarName('counter'),
                         Types.MORE_)
 indexOf_loop_operations = (('if',indexOf_loop_if),
-                         ('var_change','counter',(Types.VarName('counter'),
+                         ('var_change',('counter',),(Types.VarName('counter'),
                                                   Number.Number.new((1,),{},),
                                                   Types.PLUS_))
                          )
@@ -481,7 +481,7 @@ join_loop_operations = (('var','to_return',(Types.VarName('to_return'),
                                             1,
                                       Types.ClassExecute('concat'),
                                       Types.EXECUTE_),),
-                         ('var_change','counter',(Types.VarName('counter'),
+                         ('var_change',('counter',),(Types.VarName('counter'),
                                                   Number.Number.new((1,),{}),
                                                   Types.PLUS_)),
                          )
@@ -561,7 +561,7 @@ lastIndexOf_loop_condition = (-1,
                             Types.VarName('counter'),
                             Types.LESS_)
 lastIndexOf_loop_operations = (('if',lastIndexOf_loop_if),
-                         ('var_change','counter',(Types.VarName('counter'),
+                         ('var_change',('counter',),(Types.VarName('counter'),
                                                   Number.Number.new((1,),{},),
                                                   Types.MINUS_))
                          )
@@ -639,21 +639,19 @@ reduce_loop_operations = (('let','b',(Types.VarName('counter'),
                                     Types.VarName('this'),
                                     Types.LISTACCESS_,)),
                      ('let','a',(Types.VarName('result'),)),
-                    ('var_change','result',(Types.VarName('b'),
+                    ('var_change',('result',),(Types.VarName('b'),
                                             Types.VarName('a'),
                                             2,
                                             Types.VarName('callback'),
                                             Types.EXECUTE_)
                         ),
-                    ('var_change','counter',(Types.VarName('counter'),
+                    ('var_change',('counter',),(Types.VarName('counter'),
                                              Number.Number.new((1,),{}),
                                              Types.PLUS_))
                      )
 reduce_loop = Types.Loop(reduce_loop_stop_condition,
                          reduce_loop_operations)
 
-#if_reduce_operations = (('if_condition',),
-#    )
 
 reduce_operations = (('let','counter',(Number.Number.new((1,),{}),)),
                      ('var','result',(Number.Number.new((0,),{}),

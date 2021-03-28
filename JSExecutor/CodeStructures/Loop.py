@@ -16,6 +16,7 @@ operations:
         ('if_condition',(one,two,+,...))
     ('try',Try())
     ('continue',)
+    ('break',)
 '''
 
 
@@ -31,54 +32,46 @@ class Loop(CodeBlock):
 
     def execute(self,global_variables:dict):
         local_variables = {}
-        while bool(self.calc_operation(self.stop_condition,global_variables,local_variables)):
+        break_fired = False
+        while not break_fired \
+            and bool(self.calc_operation(self.stop_condition,global_variables,local_variables)):
+            
             for operation in self.operations:
                 if operation[0] == 'var':
                     result = self.calc_operation(operation[2],\
                                             global_variables,\
                                             local_variables)
                     global_variables[operation[1]] = result
+
                 elif operation[0] == 'var_change':
+                    index = self.calc_operation(operation[1],\
+                                            global_variables,\
+                                            local_variables)
                     result = self.calc_operation(operation[2],\
-                                        global_variables,\
-                                        local_variables)
-                    if isinstance(operation[1],str):
-                        try:
-                            res = local_variables[operation[1]]
-                            local_variables[operation[1]] = result
-                        except:
+                                            global_variables,\
+                                            local_variables)
+                    if isinstance(index,tuple):
+                        data = self.get_variable(index[0],
+                                                 global_variables,
+                                                 local_variables)
+                        for layer in index[1:-1]:
+                            new_index = index_check(layer)
                             try:
-                                res = global_variables[operation[1]]
-                                global_variables[operation[1]] = result
+                                data = data[new_index]
                             except:
-                                raise Exceptions.ReferenceError(operation[1])
+                                raise Exceptions.ReferenceError(new_index)
+
+                        new_index = index_check(index[-1])
+                        try:
+                            data[new_index] = result 
+                        except:
+                            raise Exceptions.ReferenceError(new_index)
                     else:
-                        if isinstance(operation[1][0],tuple):
-                            index = self.calc_operation(operation[1][0],global_variables,local_variables)
-                        else:
-                            index = operation[1][0]
-                        try:
-                            data = local_variables[index]
-                        except:
-                            try:
-                                data = global_variables[index]
-                            except:
-                                raise Exceptions.ReferenceError(index)
-                    
-                        for layer in operation[1][1:-1]:
-                            if isinstance(layer,tuple):
-                                index = self.calc_operation(layer,global_variables,local_variables)
-                            else:
-                                index = layer
-                            try:
-                                data = data[index]
-                            except:
-                                raise Exceptions.ReferenceError(index)
-                        if isinstance(operation[1][-1],tuple):
-                            index = self.calc_operation(operation[1][-1],global_variables,local_variables)
-                        else:
-                            index = operation[1][-1]
-                        data[operation[1][-1]] = result
+                        self.change_variable(index,
+                                             result,
+                                             global_variables,
+                                             local_variables)
+
                 elif operation[0] == 'let':
                     result = self.calc_operation(operation[2],\
                                         global_variables,\
@@ -91,21 +84,39 @@ class Loop(CodeBlock):
                     global_copy.update(local_variables)
                     result = operation[1].execute(global_copy)
                     if isinstance(result,tuple):
-                        return result
+                        if result[2] == 'return':
+                            return result
+                        elif result[2] == 'continue':
+                            break
+                        else:
+                            break_fired = True
+                            break
 
                 elif operation[0] == 'loop':
                     global_copy = global_variables.copy()
                     global_copy.update(local_variables)
                     result = operation[1].execute(global_copy)
                     if isinstance(result,tuple):
-                        return result
+                        if result[2] == 'return':
+                            return result
+                        elif result[2] == 'continue':
+                            break
+                        else:
+                            break_fired = True
+                            break
 
                 elif operation[0] == 'try':                    
                     global_copy = global_variables.copy()
                     global_copy.update(local_variables)
                     result = operation[1].execute(global_copy)
                     if isinstance(result,tuple):
-                        return result
+                        if result[2] == 'return':
+                            return result
+                        elif result[2] == 'continue':
+                            break
+                        else:
+                            break_fired = True
+                            break
                     
                 elif operation[0] == 'return':
                     result = self.calc_operation(operation[1],\
@@ -113,6 +124,9 @@ class Loop(CodeBlock):
                                             local_variables)
                     return result,global_variables
                 elif operation[0] == 'continue':
+                    break
+                elif operation[0] == 'break':
+                    break_fired = True
                     break
 
         return global_variables

@@ -22,7 +22,6 @@ operations:
     
 '''
 
-
 class Try(CodeBlock):
     def __init__(self,branches:tuple):
         self._try = []
@@ -66,46 +65,34 @@ class Try(CodeBlock):
                                                     local_variables)
                     global_variables[operation[1]] = result
                 elif operation[0] == 'var_change':
+                    index = self.calc_operation(operation[1],\
+                                            global_variables,\
+                                            local_variables)
                     result = self.calc_operation(operation[2],\
-                                                global_variables,\
-                                                local_variables)
-                    if isinstance(operation[1],str):
+                                            global_variables,\
+                                            local_variables)
+                    if isinstance(index,tuple):
+                        data = self.get_variable(index[0],
+                                                 global_variables,
+                                                 local_variables)
+                        for layer in index[1:-1]:
+                            new_index = index_check(layer)
+                            try:
+                                data = data[new_index]
+                            except:
+                                raise Exceptions.ReferenceError(new_index)
+
+                        new_index = index_check(index[-1])
                         try:
-                            res = local_variables[operation[1]]
-                            local_variables[operation[1]] = result
+                            data[new_index] = result 
                         except:
-                            try:
-                                res = global_variables[operation[1]]
-                                global_variables[operation[1]] = result
-                            except:
-                                raise Exceptions.ReferenceError(operation[1])
+                            raise Exceptions.ReferenceError(new_index)
                     else:
-                        if isinstance(operation[1][0],tuple):
-                            index = self.calc_operation(operation[1][0],global_variables,local_variables)
-                        else:
-                            index = operation[1][0]
-                            try:
-                                data = local_variables[index]
-                            except:
-                                try:
-                                    data = global_variables[index]
-                                except:
-                                    raise Exceptions.ReferenceError(index)
-                    
-                            for layer in operation[1][1:-1]:
-                                if isinstance(layer,tuple):
-                                    index = self.calc_operation(layer,global_variables,local_variables)
-                                else:
-                                    index = layer
-                                try:
-                                    data = data[index]
-                                except:
-                                    raise Exceptions.ReferenceError(index)
-                            if isinstance(operation[1][-1],tuple):
-                                index = self.calc_operation(operation[1][-1],global_variables,local_variables)
-                            else:
-                                index = operation[1][-1]
-                            data[operation[1][-1]] = result
+                        self.change_variable(index,
+                                             result,
+                                             global_variables,
+                                             local_variables)
+
                 elif operation[0] == 'let':
                     result = self.calc_operation(operation[2],\
                                                 global_variables,\
@@ -136,9 +123,14 @@ class Try(CodeBlock):
                     
                 elif operation[0] == 'return':
                     result = self.calc_operation(operation[1],\
-                                                    global_variables,\
-                                                    local_variables)
-                    return result,global_variables
+                                                global_variables,\
+                                                local_variables)
+                    return result,global_variables,'return'
+                elif operation[0] == 'continue':
+                    return None,global_variables,'continue'
+                elif operation[0] == 'break':
+                    return None,global_variables,'break'
+
             except Exceptions as e:
                 exception_fired_try = True
                 exception_try = e
@@ -153,46 +145,33 @@ class Try(CodeBlock):
                                                         local_variables)
                         global_variables[operation[1]] = result
                     elif operation[0] == 'var_change':
-                        result = self.calc_operation(operation[2],\
+                        index = self.calc_operation(operation[1],\
                                                     global_variables,\
                                                     local_variables)
-                        if isinstance(operation[1],str):
+                        result = self.calc_operation(operation[2],\
+                                                global_variables,\
+                                                local_variables)
+                        if isinstance(index,tuple):
+                            data = self.get_variable(index[0],
+                                                     global_variables,
+                                                     local_variables)
+                            for layer in index[1:-1]:
+                                new_index = index_check(layer)
+                                try:
+                                    data = data[new_index]
+                                except:
+                                    raise Exceptions.ReferenceError(new_index)
+
+                            new_index = index_check(index[-1])
                             try:
-                                res = local_variables[operation[1]]
-                                local_variables[operation[1]] = result
+                                data[new_index] = result 
                             except:
-                                try:
-                                    res = global_variables[operation[1]]
-                                    global_variables[operation[1]] = result
-                                except:
-                                    raise Exceptions.ReferenceError(operation[1])
+                                raise Exceptions.ReferenceError(new_index)
                         else:
-                            if isinstance(operation[1][0],tuple):
-                                index = self.calc_operation(operation[1][0],global_variables,local_variables)
-                            else:
-                                index = operation[1][0]
-                                try:
-                                    data = local_variables[index]
-                                except:
-                                    try:
-                                        data = global_variables[index]
-                                    except:
-                                        raise Exceptions.ReferenceError(index)
-                    
-                                for layer in operation[1][1:-1]:
-                                    if isinstance(layer,tuple):
-                                        index = self.calc_operation(layer,global_variables,local_variables)
-                                    else:
-                                        index = layer
-                                    try:
-                                        data = data[index]
-                                    except:
-                                        raise Exceptions.ReferenceError(index)
-                                if isinstance(operation[1][-1],tuple):
-                                    index = self.calc_operation(operation[1][-1],global_variables,local_variables)
-                                else:
-                                    index = operation[1][-1]
-                                data[operation[1][-1]] = result
+                            self.change_variable(index,
+                                                 result,
+                                                 global_variables,
+                                                 local_variables)
                     elif operation[0] == 'let':
                         result = self.calc_operation(operation[2],\
                                                     global_variables,\
@@ -226,9 +205,13 @@ class Try(CodeBlock):
                     
                     elif operation[0] == 'return':
                         result = self.calc_operation(operation[1],\
-                                                        global_variables,\
-                                                        local_variables)
-                        return result,global_variables
+                                                global_variables,\
+                                                local_variables)
+                        return result,global_variables,'return'
+                    elif operation[0] == 'continue':
+                        return None,global_variables,'continue'
+                    elif operation[0] == 'break':
+                        return None,global_variables,'break'
 
                 except Exceptions as e:
                     exception_fired_catch = True
@@ -242,46 +225,33 @@ class Try(CodeBlock):
                                                         local_variables)
                 global_variables[operation[1]] = result
             elif operation[0] == 'var_change':
+                index = self.calc_operation(operation[1],\
+                                            global_variables,\
+                                            local_variables)
                 result = self.calc_operation(operation[2],\
-                                                    global_variables,\
-                                                    local_variables)
-                if isinstance(operation[1],str):
+                                        global_variables,\
+                                        local_variables)
+                if isinstance(index,tuple):
+                    data = self.get_variable(index[0],
+                                             global_variables,
+                                             local_variables)
+                    for layer in index[1:-1]:
+                        new_index = index_check(layer)
+                        try:
+                            data = data[new_index]
+                        except:
+                            raise Exceptions.ReferenceError(new_index)
+
+                    new_index = index_check(index[-1])
                     try:
-                        res = local_variables[operation[1]]
-                        local_variables[operation[1]] = result
+                        data[new_index] = result 
                     except:
-                        try:
-                            res = global_variables[operation[1]]
-                            global_variables[operation[1]] = result
-                        except:
-                            raise Exceptions.ReferenceError(operation[1])
+                        raise Exceptions.ReferenceError(new_index)
                 else:
-                    if isinstance(operation[1][0],tuple):
-                        index = self.calc_operation(operation[1][0],global_variables,local_variables)
-                    else:
-                        index = operation[1][0]
-                        try:
-                            data = local_variables[index]
-                        except:
-                            try:
-                                data = global_variables[index]
-                            except:
-                                raise Exceptions.ReferenceError(index)
-                    
-                        for layer in operation[1][1:-1]:
-                            if isinstance(layer,tuple):
-                                index = self.calc_operation(layer,global_variables,local_variables)
-                            else:
-                                index = layer
-                            try:
-                                data = data[index]
-                            except:
-                                raise Exceptions.ReferenceError(index)
-                        if isinstance(operation[1][-1],tuple):
-                            index = self.calc_operation(operation[1][-1],global_variables,local_variables)
-                        else:
-                            index = operation[1][-1]
-                    data[operation[1][-1]] = result
+                    self.change_variable(index,
+                                         result,
+                                         global_variables,
+                                         local_variables)
             elif operation[0] == 'let':
                 result = self.calc_operation(operation[2],\
                                                     global_variables,\
@@ -315,9 +285,13 @@ class Try(CodeBlock):
                     
             elif operation[0] == 'return':
                 result = self.calc_operation(operation[1],\
-                                                        global_variables,\
-                                                        local_variables)
-                return result,global_variables
+                                                global_variables,\
+                                                local_variables)
+                return result,global_variables,'return'
+            elif operation[0] == 'continue':
+                return None,global_variables,'continue'
+            elif operation[0] == 'break':
+                return None,global_variables,'break'
 
 
         if global_copy != None:
