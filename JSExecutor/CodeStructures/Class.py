@@ -5,21 +5,24 @@ from .CodeBlock import CodeBlock
 
 
 class Class:
-    def __init__(self,name:str,constructor:Types.Function,methods:dict):
+    def __init__(self,name:str,
+                 constructor:Types.Function,
+                 variables:dict):
         '''
         constructor - function
         methods = {'funcName':Function()}
         '''
         self.name = name
         self.constructor = constructor
-        self.methods = methods
+        #self.methods = methods
+        self.variables = variables
 
     def new(self,arguments:tuple,global_variables:dict):
         '''
         if constructor returns NaN, then new will return NaN
         if constructor returns something different from NaN, will return object
         '''
-        global_variables['this.'] = {}
+        global_variables['this.'] = self.variables.copy()
         result = self.constructor.execute(arguments,global_variables)
         if result == Types.NaN:
             return result
@@ -34,12 +37,12 @@ class Class:
 
 
 class Object(CodeBlock):
-    def __init__(self,MotherClass:Class,this:dict,extends=False):
+    def __init__(self,prototype:Class,this:dict,extends=False):
         '''
         extends - Class()
         '''
 
-        self.MotherClass = MotherClass
+        self.prototype = prototype
         self.extends = extends
         self.this = this
         self.this['this.'] = self
@@ -51,12 +54,13 @@ class Object(CodeBlock):
             if self.extends != False:
                 return self.extends.get_attribute(attribute_name)
             else:
-                try:
-                    return self.MotherClass.methods[attribute_name]
-                except:
-                    #raise Exceptions.AttributeError(self.MotherClass.name,
-                    #                                attribute_name)
-                    return Types.undefined
+                return Types.undefined
+                #try:
+                #    return self.MotherClass.methods[attribute_name]
+                #except:
+                #    #raise Exceptions.AttributeError(self.MotherClass.name,
+                #    #                                attribute_name)
+                #    return Types.undefined
     def execute_function(self,\
                         function_name:str,\
                         arguments:tuple,\
@@ -104,7 +108,7 @@ class Object(CodeBlock):
 
 
     def typeof(self):
-        return self.MotherClass.get_name()
+        return self.prototype.get_name()
 
 
 

@@ -58,6 +58,7 @@ NUMBER_METHODS = {}
 
 Number = Types.Class(None,NUMBER_CONSTRUCTOR,NUMBER_METHODS)
 Number.name = String.String.new((String.string_native('number'),),{})
+
 '''
 Number class definition END
 '''
@@ -268,7 +269,7 @@ valueOf_wrapper = Types.Function(('this',),
 valueOf function END
 '''
 
-Number.methods = {'toExponential':toExponential_wrapper,
+Number.variables = {'toExponential':toExponential_wrapper,
                   'toFixed':toFixed_wrapper,
                   'toLocaleString':toLocaleString_wrapper,
                   'toPrecision':toPrecision_wrapper,
